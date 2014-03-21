@@ -148,10 +148,10 @@ def showSite(url, stopPlayback, kiosk, userAgent):
         path = "/usr/bin/google-chrome"
         if useCustomPath and os.path.exists(customPath):
             fullUrl = getFullPath(customPath, url, kiosk, userAgent)
-            subprocess.Popen(fullUrl, shell=True)
+            subprocess.Popen(fullUrl, shell=True).communicate()
         elif os.path.exists(path):
             fullUrl = getFullPath(path, url, kiosk, userAgent)
-            subprocess.Popen(fullUrl, shell=True)
+            subprocess.Popen(fullUrl, shell=True).communicate()
         else:
             xbmc.executebuiltin('XBMC.Notification(Info:,'+str(translation(30005))+'!,5000)')
             addon.openSettings()
@@ -237,6 +237,7 @@ def addSiteDir(name, url, mode, iconimage, stopPlayback, kiosk):
     ok = True
     liz = xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
     liz.setInfo(type="Video", infoLabels={"Title": name})
+    
     liz.addContextMenuItems([(translation(30006), 'RunPlugin(plugin://'+addonID+'/?mode=editSite&url='+urllib.quote_plus(name)+')',), (translation(30002), 'RunPlugin(plugin://'+addonID+'/?mode=removeSite&url='+urllib.quote_plus(name)+')',)])
     ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=True)
     return ok
@@ -254,9 +255,12 @@ if mode == 'addSite':
     addSite()
 elif mode == 'showSite':
     showSite(url, stopPlayback, kiosk, userAgent)
+    xbmcplugin.endOfDirectory(pluginhandle)
+    xbmc.executebuiltin("ReplaceWindow(Programs,%s)" % ("plugin://"+addonID+"/"))
 elif mode == 'removeSite':
     removeSite(url)
 elif mode == 'editSite':
     editSite(url)
 else:
     index()
+
